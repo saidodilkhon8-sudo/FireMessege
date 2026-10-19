@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="128" fill="#000000"/>
+  <rect x="8" y="8" width="496" height="496" rx="120" stroke="#292929" stroke-width="4"/>
+  <path d="M256 64L384 192V360C384 413.019 326.69 456 256 456C185.31 456 128 413.019 128 360V192L256 64Z" stroke="#FFFFFF" stroke-width="8" stroke-linejoin="round" fill="#080808"/>
+  <!-- Futuristic flame facet core -->
+  <path d="M256 120L340 216V344C340 380 298 416 256 416C214 416 172 380 172 344V216L256 120Z" fill="url(#fireGradient)" stroke="#FFFFFF" stroke-width="6"/>
+  <!-- Inner cyber flame -->
+  <path d="M256 200C270 240 300 270 300 310C300 340 280 370 256 370C232 370 212 340 212 310C212 270 242 240 256 200Z" fill="#FFFFFF"/>
+  <circle cx="256" cy="324" r="14" fill="#000000"/>
+  <!-- Spark nodes -->
+  <line x1="256" y1="40" x2="256" y2="80" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="390" y1="174" x2="424" y2="150" stroke="#8A8A8A" stroke-width="4" stroke-linecap="round"/>
+  <line x1="122" y1="174" x2="88" y2="150" stroke="#8A8A8A" stroke-width="4" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="fireGradient" x1="256" y1="120" x2="256" y2="416" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#181818" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#080808" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,7 @@
+{
+  "name": "FireMessage",
+  "description": "Futuristic 3D glassmorphic monochrome messenger with real-time chats, WebRTC audio/video calls, and PWA support.",
+  "requestFramePermissions": ["camera", "microphone", "notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

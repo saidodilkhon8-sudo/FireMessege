@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+:root {
+  --color-pure-black: #000000;
+  --color-deep-black: #080808;
+  --color-dark-surface: #111111;
+  --color-elevated-surface: #181818;
+  --color-neutral-border: #292929;
+  --color-secondary-gray: #8A8A8A;
+  --color-light-gray: #D0D0D0;
+  --color-pure-white: #FFFFFF;
+  
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+body {
+  background-color: #000000;
+  color: #FFFFFF;
+  overflow-x: hidden;
+}
+
+/* Custom Monochrome Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #292929;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8A8A8A;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(17, 17, 17, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-elevated {
+  background: rgba(24, 24, 24, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-card-interactive {
+  background: rgba(17, 17, 17, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid #292929;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-interactive:hover {
+  background: rgba(24, 24, 24, 0.9);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+.glow-subtle {
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
+}
+
+.glow-intense {
+  box-shadow: 0 0 35px rgba(255, 255, 255, 0.35);
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Pulse animation for active voice recording / audio waveform */
+@keyframes monochrome-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+}
+
+.animate-mono-pulse {
+  animation: monochrome-pulse 2s infinite ease-in-out;
+}
