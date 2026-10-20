@@ -5,6 +5,7 @@ import { getTranslation } from '../../i18n';
 import { contactsService } from '../../services/contactsService';
 import { chatService } from '../../services/chatService';
 import { sound } from '../../utils/sound';
+import { FULL_SUPABASE_SQL } from '../../lib/sqlMigration';
 
 interface ContactsViewProps {
   currentUserId: string;
@@ -159,6 +160,29 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
             </button>
           </div>
 
+          {/* Schema Migration Notice Banner */}
+          {contactsService.isSchemaMissing && (
+            <div className="p-4 rounded-2xl bg-[#111111] border border-white/20 text-white space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold">
+                <span>⚠️ Таблицы базы данных ещё не созданы в Supabase!</span>
+              </div>
+              <p className="text-[11px] text-[#8A8A8A] leading-relaxed">
+                Таблица <code className="text-white bg-[#181818] px-1 py-0.5 rounded">public.profiles</code> отсутствует в проекте. Скопируйте готовый SQL-скрипт ниже, откройте <strong>Supabase → SQL Editor</strong>, вставьте и нажмите <strong>RUN</strong>. После этого нажмите «Обновить список ↻».
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  navigator.clipboard.writeText(FULL_SUPABASE_SQL);
+                  alert('✓ SQL-скрипт скопирован в буфер обмена!\n\nОткройте https://supabase.com -> ваш проект -> раздел SQL Editor -> вставьте код и нажмите RUN.');
+                }}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs uppercase tracking-wider hover:opacity-90 transition flex items-center justify-center gap-2"
+              >
+                <span>📋 Скопировать SQL-скрипт для Supabase</span>
+              </button>
+            </div>
+          )}
+
           {/* User Results Grid */}
           <div className="space-y-3 mt-1">
             {isSearching && (
@@ -169,13 +193,24 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
             )}
 
             {!isSearching && searchResults.length === 0 && (
-              <div className="py-16 text-center text-xs text-[#8A8A8A] flex flex-col items-center">
+              <div className="py-12 text-center text-xs text-[#8A8A8A] flex flex-col items-center">
                 <User className="w-8 h-8 text-[#292929] mb-3" />
-                <span>
+                <span className="mb-2">
                   {searchQuery.trim()
                     ? 'Пользователи с таким именем не найдены'
-                    : 'Другие пользователи пока не зарегистрированы в системе'}
+                    : 'Другие пользователи пока не найдены'}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    navigator.clipboard.writeText(FULL_SUPABASE_SQL);
+                    alert('✓ SQL-скрипт скопирован в буфер обмена!\n\nОткройте https://supabase.com -> ваш проект -> раздел SQL Editor -> вставьте код и нажмите RUN.');
+                  }}
+                  className="mt-2 px-3 py-1.5 rounded-lg bg-[#181818] border border-[#292929] text-xs text-[#D0D0D0] hover:text-white hover:border-white transition"
+                >
+                  📋 Скопировать SQL-скрипт для Supabase
+                </button>
               </div>
             )}
 

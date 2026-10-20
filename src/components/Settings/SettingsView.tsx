@@ -5,6 +5,7 @@ import { getTranslation } from '../../i18n';
 import { getStoredSupabaseConfig, saveSupabaseConfig, clearSupabaseConfig, testSupabaseConnection } from '../../lib/supabase';
 import { sound } from '../../utils/sound';
 import { PWAInstallButton } from '../PWA/PWAInstallButton';
+import { FULL_SUPABASE_SQL } from '../../lib/sqlMigration';
 
 interface SettingsViewProps {
   lang: Language;
@@ -25,7 +26,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     typeof Notification !== 'undefined' ? Notification.permission : 'default'
   );
 
-  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [testResult, setTestResult] = useState<{ success: boolean; isSchemaMissing?: boolean; message: string } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
   const [saveNotice, setSaveNotice] = useState(false);
 
@@ -223,18 +224,33 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
           {testResult && (
             <div
-              className={`p-3 rounded-xl border text-xs flex items-center gap-2 ${
+              className={`p-3.5 rounded-xl border text-xs flex flex-col gap-2.5 ${
                 testResult.success
                   ? 'bg-[#111111] text-white border-white'
                   : 'bg-[#111111] text-[#D0D0D0] border-[#292929]'
               }`}
             >
-              {testResult.success ? (
-                <Check className="w-4 h-4 text-white shrink-0" />
-              ) : (
-                <AlertCircle className="w-4 h-4 text-white shrink-0" />
+              <div className="flex items-center gap-2">
+                {testResult.success ? (
+                  <Check className="w-4 h-4 text-white shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-white shrink-0" />
+                )}
+                <span>{testResult.message}</span>
+              </div>
+              {testResult.isSchemaMissing && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    navigator.clipboard.writeText(FULL_SUPABASE_SQL);
+                    alert('✓ SQL-скрипт скопирован в буфер обмена!\n\n1. Откройте https://supabase.com -> ваш проект\n2. Перейдите в раздел SQL Editor\n3. Вставьте скопированный код и нажмите RUN');
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-white text-black font-semibold text-xs tracking-wider uppercase hover:opacity-90 transition flex items-center justify-center gap-2 self-start"
+                >
+                  <span>📋 Скопировать SQL-скрипт для Supabase</span>
+                </button>
               )}
-              <span>{testResult.message}</span>
             </div>
           )}
 

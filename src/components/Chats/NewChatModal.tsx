@@ -5,6 +5,7 @@ import { getTranslation } from '../../i18n';
 import { contactsService } from '../../services/contactsService';
 import { chatService } from '../../services/chatService';
 import { sound } from '../../utils/sound';
+import { FULL_SUPABASE_SQL } from '../../lib/sqlMigration';
 
 interface NewChatModalProps {
   currentUserId: string;
@@ -120,6 +121,27 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({
             Обновить ↻
           </button>
         </div>
+
+        {/* Schema missing banner */}
+        {contactsService.isSchemaMissing && (
+          <div className="mb-3 p-3 rounded-xl bg-[#111111] border border-white/20 text-white space-y-2">
+            <div className="text-xs font-bold text-white">⚠️ Таблицы базы данных не созданы в Supabase!</div>
+            <p className="text-[11px] text-[#8A8A8A] leading-relaxed">
+              Выполните SQL-миграцию в Supabase SQL Editor для работы профилей и сообщений.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                sound.playClick();
+                navigator.clipboard.writeText(FULL_SUPABASE_SQL);
+                alert('✓ SQL-скрипт скопирован в буфер обмена!\n\nОткройте https://supabase.com -> ваш проект -> раздел SQL Editor -> вставьте код и нажмите RUN.');
+              }}
+              className="w-full py-1.5 rounded-lg bg-white text-black font-semibold text-xs tracking-wider uppercase hover:opacity-90 transition"
+            >
+              📋 Скопировать SQL-скрипт
+            </button>
+          </div>
+        )}
 
         {/* Search results list */}
         <div className="max-h-64 overflow-y-auto space-y-1">

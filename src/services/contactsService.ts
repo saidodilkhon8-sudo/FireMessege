@@ -2,13 +2,15 @@ import { supabase, getStoredSupabaseConfig } from '../lib/supabase';
 import { Profile, UserBlock } from '../types';
 
 export const contactsService = {
+  isSchemaMissing: false,
+
   async searchUsers(query: string, currentUserId: string): Promise<Profile[]> {
     const { isConfigured } = getStoredSupabaseConfig();
     if (!isConfigured) return [];
 
     const cleanQuery = query.trim().replace(/^@/, '');
 
-    // 1. If query is empty, return recent active users so User 2 is immediately visible!
+    // 1. If query is empty, return recent active users so all users are immediately visible!
     if (!cleanQuery) {
       const { data, error } = await supabase
         .from('profiles')
@@ -18,37 +20,51 @@ export const contactsService = {
         .limit(50);
 
       if (error) {
+        if (error.code === 'PGRST205' || error.message?.includes('schema cache')) {
+          this.isSchemaMissing = true;
+        }
         console.warn('Error fetching all profiles:', error.message);
         return [];
       }
+      this.isSchemaMissing = false;
       return (data as Profile[]) || [];
     }
 
-    // 2. Try database ILIKE search with quoted patterns
+    // 2. Try database ILIKE search with standard PostgREST syntax
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .or(`username.ilike."%${cleanQuery}%",full_name.ilike."%${cleanQuery}%"`)
+        .or(`username.ilike.%${cleanQuery}%,full_name.ilike.%${cleanQuery}%`)
         .neq('id', currentUserId)
         .limit(50);
 
-      if (!error && data && data.length > 0) {
+      if (error) {
+        if (error.code === 'PGRST205' || error.message?.includes('schema cache')) {
+          this.isSchemaMissing = true;
+        }
+      } else if (data && data.length > 0) {
+        this.isSchemaMissing = false;
         return data as Profile[];
       }
     } catch (err) {
-      console.warn('PostgREST search error, falling back to client filter:', err);
+      console.warn('PostgREST search error, trying fallback:', err);
     }
 
     // 3. Fallback: fetch users and filter client-side (handles Cyrillic, spaces, case differences)
     try {
-      const { data: allUsers } = await supabase
+      const { data: allUsers, error: allErr } = await supabase
         .from('profiles')
         .select('*')
         .neq('id', currentUserId)
         .limit(100);
 
+      if (allErr && (allErr.code === 'PGRST205' || allErr.message?.includes('schema cache'))) {
+        this.isSchemaMissing = true;
+      }
+
       if (allUsers) {
+        this.isSchemaMissing = false;
         const q = cleanQuery.toLowerCase();
         return (allUsers as Profile[]).filter(
           (u) =>

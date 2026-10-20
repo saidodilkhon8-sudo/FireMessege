@@ -95,7 +95,7 @@ export function clearSupabaseConfig(): void {
 }
 
 
-export async function testSupabaseConnection(testUrl?: string, testKey?: string): Promise<{ success: boolean; message: string }> {
+export async function testSupabaseConnection(testUrl?: string, testKey?: string): Promise<{ success: boolean; isSchemaMissing?: boolean; message: string }> {
   try {
     const config = getStoredSupabaseConfig();
     const url = testUrl || config.url;
@@ -108,14 +108,22 @@ export async function testSupabaseConnection(testUrl?: string, testKey?: string)
     const testClient = createClient(url, anonKey, { auth: { persistSession: false } });
     const { error } = await testClient.from('profiles').select('id').limit(1);
 
-    if (error && error.code !== 'PGRST116') {
-      // If error is permission or table missing, report clearly
-      return { success: true, message: `Connected to Supabase endpoint! (Note: ${error.message})` };
+    if (error) {
+      if (error.code === 'PGRST205' || error.message?.includes('not find') || error.message?.includes('schema cache')) {
+        return {
+          success: false,
+          isSchemaMissing: true,
+          message: "Подключение к Supabase есть, но таблицы не созданы (таблица 'profiles' отсутствует). Нажмите «Скопировать SQL-скрипт» и выполните его в Supabase SQL Editor.",
+        };
+      }
+      if (error.code !== 'PGRST116') {
+        return { success: false, message: `Ошибка Supabase: ${error.message}` };
+      }
     }
 
-    return { success: true, message: 'Successfully connected and verified Supabase database schema!' };
+    return { success: true, isSchemaMissing: false, message: 'Успешно подключено к Supabase! Таблицы созданы и верифицированы.' };
   } catch (err: any) {
-    return { success: false, message: err?.message || 'Connection test failed. Verify URL and key.' };
+    return { success: false, message: err?.message || 'Ошибка проверки соединения. Проверьте URL и ключ.' };
   }
 }
 
