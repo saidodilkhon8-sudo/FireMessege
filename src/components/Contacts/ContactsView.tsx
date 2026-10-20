@@ -34,18 +34,8 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (activeTab === 'blocked') {
-      loadBlocked();
-    }
-  }, [activeTab]);
-
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
     setIsSearching(true);
     try {
       const res = await contactsService.searchUsers(query, currentUserId);
@@ -56,6 +46,14 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
       setIsSearching(false);
     }
   };
+
+  useEffect(() => {
+    if (activeTab === 'blocked') {
+      loadBlocked();
+    } else {
+      handleSearch(searchQuery);
+    }
+  }, [activeTab]);
 
   const handleStartChat = async (targetUserId: string) => {
     setActionLoading(targetUserId);
@@ -146,8 +144,23 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
             />
           </div>
 
+          {/* Header row with counter and refresh */}
+          <div className="flex items-center justify-between px-1 text-xs text-[#8A8A8A]">
+            <span>
+              {searchQuery.trim()
+                ? `Найдено: ${searchResults.length}`
+                : `Все пользователи (${searchResults.length})`}
+            </span>
+            <button
+              onClick={() => handleSearch(searchQuery)}
+              className="hover:text-white transition font-mono text-[11px]"
+            >
+              Обновить список ↻
+            </button>
+          </div>
+
           {/* User Results Grid */}
-          <div className="space-y-3 mt-2">
+          <div className="space-y-3 mt-1">
             {isSearching && (
               <div className="py-12 text-center text-xs text-[#8A8A8A]">
                 <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-3" />
@@ -155,16 +168,14 @@ export const ContactsView: React.FC<ContactsViewProps> = ({
               </div>
             )}
 
-            {!isSearching && searchQuery.trim() && searchResults.length === 0 && (
-              <div className="py-12 text-center text-xs text-[#8A8A8A]">
-                Пользователи с таким именем не найдены
-              </div>
-            )}
-
-            {!isSearching && !searchQuery.trim() && (
+            {!isSearching && searchResults.length === 0 && (
               <div className="py-16 text-center text-xs text-[#8A8A8A] flex flex-col items-center">
                 <User className="w-8 h-8 text-[#292929] mb-3" />
-                <span>Введите никнейм для мгновенного поиска</span>
+                <span>
+                  {searchQuery.trim()
+                    ? 'Пользователи с таким именем не найдены'
+                    : 'Другие пользователи пока не зарегистрированы в системе'}
+                </span>
               </div>
             )}
 

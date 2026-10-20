@@ -29,11 +29,6 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
     setIsSearching(true);
     try {
       const results = await contactsService.searchUsers(query, currentUserId);
@@ -44,6 +39,10 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({
       setIsSearching(false);
     }
   };
+
+  React.useEffect(() => {
+    handleSearch('');
+  }, []);
 
   const handleStartDirectChat = async (targetUserId: string) => {
     setIsCreating(true);
@@ -99,8 +98,8 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({
           <ArrowRight className="w-4 h-4 text-[#8A8A8A] group-hover:text-white transition group-hover:translate-x-1" />
         </button>
 
-        {/* Search input */}
-        <div className="relative mb-4">
+        {/* Search input with refresh */}
+        <div className="relative mb-3">
           <Search className="absolute left-3.5 top-3 w-4 h-4 text-[#8A8A8A]" />
           <input
             type="text"
@@ -112,8 +111,18 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({
           />
         </div>
 
+        <div className="flex items-center justify-between mb-2 px-1 text-[11px] text-[#8A8A8A]">
+          <span>{searchQuery.trim() ? 'Результаты поиска' : 'Все пользователи'}</span>
+          <button
+            onClick={() => handleSearch(searchQuery)}
+            className="hover:text-white transition font-mono"
+          >
+            Обновить ↻
+          </button>
+        </div>
+
         {/* Search results list */}
-        <div className="max-h-60 overflow-y-auto space-y-1">
+        <div className="max-h-64 overflow-y-auto space-y-1">
           {isSearching && (
             <div className="py-8 text-center text-xs text-[#8A8A8A]">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-2" />
@@ -121,15 +130,11 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({
             </div>
           )}
 
-          {!isSearching && searchQuery.trim() && searchResults.length === 0 && (
+          {!isSearching && searchResults.length === 0 && (
             <div className="py-8 text-center text-xs text-[#8A8A8A]">
-              Пользователи с таким именем не найдены
-            </div>
-          )}
-
-          {!isSearching && !searchQuery.trim() && (
-            <div className="py-8 text-center text-xs text-[#8A8A8A]">
-              Введите @username для поиска собеседника
+              {searchQuery.trim()
+                ? 'Пользователи с таким именем не найдены'
+                : 'Другие пользователи пока не зарегистрированы в системе'}
             </div>
           )}
 

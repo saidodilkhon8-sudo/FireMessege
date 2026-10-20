@@ -7,21 +7,61 @@ export const contactsService = {
     if (!isConfigured) return [];
 
     const cleanQuery = query.trim().replace(/^@/, '');
-    if (!cleanQuery) return [];
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .or(`username.ilike.%${cleanQuery}%,full_name.ilike.%${cleanQuery}%`)
-      .neq('id', currentUserId)
-      .limit(20);
+    // 1. If query is empty, return recent active users so User 2 is immediately visible!
+    if (!cleanQuery) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('id', currentUserId)
+        .order('last_seen', { ascending: false })
+        .limit(50);
 
-    if (error) {
-      console.error('Error searching users:', error);
-      return [];
+      if (error) {
+        console.warn('Error fetching all profiles:', error.message);
+        return [];
+      }
+      return (data as Profile[]) || [];
     }
 
-    return (data as Profile[]) || [];
+    // 2. Try database ILIKE search with quoted patterns
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .or(`username.ilike."%${cleanQuery}%",full_name.ilike."%${cleanQuery}%"`)
+        .neq('id', currentUserId)
+        .limit(50);
+
+      if (!error && data && data.length > 0) {
+        return data as Profile[];
+      }
+    } catch (err) {
+      console.warn('PostgREST search error, falling back to client filter:', err);
+    }
+
+    // 3. Fallback: fetch users and filter client-side (handles Cyrillic, spaces, case differences)
+    try {
+      const { data: allUsers } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('id', currentUserId)
+        .limit(100);
+
+      if (allUsers) {
+        const q = cleanQuery.toLowerCase();
+        return (allUsers as Profile[]).filter(
+          (u) =>
+            u.username?.toLowerCase().includes(q) ||
+            u.full_name?.toLowerCase().includes(q) ||
+            (u.bio && u.bio.toLowerCase().includes(q))
+        );
+      }
+    } catch (err) {
+      console.error('Fallback user search failed:', err);
+    }
+
+    return [];
   },
 
   async blockUser(blockerId: string, blockedId: string): Promise<void> {

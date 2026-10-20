@@ -31,10 +31,6 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
     try {
       const results = await contactsService.searchUsers(query, currentUserId);
       setSearchResults(results);
@@ -42,6 +38,10 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
       console.error(err);
     }
   };
+
+  React.useEffect(() => {
+    handleSearch('');
+  }, []);
 
   const toggleSelectUser = (user: Profile) => {
     sound.playClick();
